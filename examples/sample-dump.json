@@ -1,0 +1,137 @@
+{
+  "payload_version": 1,
+  "account": "111122223333",
+  "region": "eu-west-1",
+  "collected_at": "2026-10-20T12:00:00Z",
+  "secrets": [
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:prod/orders/db-password-a1b2c3",
+      "Name": "prod/orders/db-password",
+      "Description": "Aurora master password for the orders cluster",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": true,
+      "RotationLambdaARN": "arn:aws:lambda:eu-west-1:111122223333:function:SecretsManagerRDSRotation",
+      "RotationRules": {"AutomaticallyAfterDays": 30},
+      "CreatedDate": "2023-02-14T09:30:00Z",
+      "LastRotatedDate": "2026-07-17T02:11:00Z",
+      "LastChangedDate": "2026-07-17T02:11:00Z",
+      "LastAccessedDate": "2026-10-19T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "orders"}, {"Key": "Env", "Value": "prod"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:prod/billing/db-password-b2c3d4",
+      "Name": "prod/billing/db-password",
+      "Description": "Aurora master password for the billing cluster",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": true,
+      "RotationLambdaARN": "arn:aws:lambda:eu-west-1:111122223333:function:SecretsManagerRDSRotation",
+      "RotationRules": {"AutomaticallyAfterDays": 30},
+      "CreatedDate": "2023-02-14T09:30:00Z",
+      "LastRotatedDate": "2026-10-04T02:11:00Z",
+      "LastChangedDate": "2026-10-04T02:11:00Z",
+      "LastAccessedDate": "2026-10-20T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "billing"}, {"Key": "Env", "Value": "prod"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:prod/stripe/api-key-c3d4e5",
+      "Name": "prod/stripe/api-key",
+      "Description": "Stripe restricted key used by the payments worker",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": true,
+      "RotationLambdaARN": "arn:aws:lambda:eu-west-1:111122223333:function:rotate-stripe-key",
+      "RotationRules": {"AutomaticallyAfterDays": 90},
+      "CreatedDate": "2024-03-01T10:00:00Z",
+      "LastChangedDate": "2024-03-01T10:00:00Z",
+      "LastAccessedDate": "2026-10-20T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "payments"}, {"Key": "Env", "Value": "prod"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:prod/partner/webhook-secret-d4e5f6",
+      "Name": "prod/partner/webhook-secret",
+      "Description": "Shared HMAC secret for the partner webhook callback",
+      "RotationEnabled": false,
+      "CreatedDate": "2022-09-10T11:00:00Z",
+      "LastChangedDate": "2022-09-10T11:00:00Z",
+      "LastAccessedDate": "2026-10-18T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "integrations"}],
+      "ResourcePolicy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "PartnerMigration2022",
+            "Effect": "Allow",
+            "Principal": {"AWS": "arn:aws:iam::999988887777:root"},
+            "Action": "secretsmanager:GetSecretValue",
+            "Resource": "*"
+          }
+        ]
+      }
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:prod/metrics/readonly-token-e5f6a7",
+      "Name": "prod/metrics/readonly-token",
+      "Description": "Read-only token handed to the status page",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": true,
+      "RotationRules": {"AutomaticallyAfterDays": 365},
+      "CreatedDate": "2024-07-01T00:00:00Z",
+      "LastRotatedDate": "2026-04-01T00:00:00Z",
+      "LastChangedDate": "2026-04-01T00:00:00Z",
+      "LastAccessedDate": "2026-10-20T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "sre"}, {"Key": "Env", "Value": "prod"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:legacy/jenkins-ssh-key-f6a7b8",
+      "Name": "legacy/jenkins-ssh-key",
+      "RotationEnabled": false,
+      "CreatedDate": "2020-11-23T16:45:00Z",
+      "LastChangedDate": "2020-11-23T16:45:00Z",
+      "LastAccessedDate": "2025-02-11T00:00:00Z",
+      "Tags": []
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:staging/grafana-admin-password-a7b8c9",
+      "Name": "staging/grafana-admin-password",
+      "Description": "Grafana admin password for the staging stack",
+      "RotationEnabled": false,
+      "CreatedDate": "2025-05-19T08:00:00Z",
+      "LastChangedDate": "2025-05-19T08:00:00Z",
+      "LastAccessedDate": "2026-10-12T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "sre"}, {"Key": "Env", "Value": "staging"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:ops/decommissioned-vpn-psk-b8c9d0",
+      "Name": "ops/decommissioned-vpn-psk",
+      "Description": "Site-to-site VPN pre-shared key, tunnel retired",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": false,
+      "CreatedDate": "2021-03-05T07:00:00Z",
+      "DeletedDate": "2026-11-12T12:00:00Z",
+      "LastAccessedDate": "2026-08-30T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "network"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:prod/internal/shared-config-c9d0e1",
+      "Name": "prod/internal/shared-config",
+      "Description": "Feature flag blob read by every service",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": false,
+      "CreatedDate": "2025-01-08T12:00:00Z",
+      "LastAccessedDate": "2026-10-20T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "platform"}, {"Key": "Env", "Value": "prod"}],
+      "ResourcePolicy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "AllowOrg",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "secretsmanager:GetSecretValue",
+            "Resource": "*",
+            "Condition": {"StringEquals": {"aws:PrincipalOrgID": "o-abcd1234ef"}}
+          }
+        ]
+      }
+    }
+  ]
+}

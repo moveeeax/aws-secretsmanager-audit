@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aws-secretsmanager-audit"
+version = "0.1.0"
+description = "Audit AWS Secrets Manager for rotation that never runs, secrets nobody reads, managed-key encryption and wildcard resource policies"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Michael Tarassov", email = "michael@tarassov.me" }]
+keywords = ["aws", "secrets-manager", "audit", "security", "sre", "rotation"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security",
+  "Topic :: System :: Systems Administration",
+]
+dependencies = ["boto3>=1.28"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.5"]
+
+[project.urls]
+Homepage = "https://github.com/moveeeax/aws-secretsmanager-audit"
+Source = "https://github.com/moveeeax/aws-secretsmanager-audit"
+
+[project.scripts]
+aws-secretsmanager-audit = "aws_secretsmanager_audit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["aws_secretsmanager_audit*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]

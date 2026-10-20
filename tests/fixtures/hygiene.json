@@ -1,0 +1,58 @@
+{
+  "payload_version": 1,
+  "account": "111122223333",
+  "region": "eu-west-1",
+  "collected_at": "2026-10-20T12:00:00Z",
+  "secrets": [
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:legacy/import-key-a1b2c3",
+      "Name": "legacy/import-key",
+      "RotationEnabled": false,
+      "CreatedDate": "2021-06-02T08:00:00Z",
+      "LastChangedDate": "2021-06-02T08:00:00Z",
+      "LastAccessedDate": "2026-04-03T00:00:00Z",
+      "Tags": []
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:ops/pending-delete-b2c3d4",
+      "Name": "ops/pending-delete",
+      "Description": "Deleted during the cleanup, still inside the recovery window",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": false,
+      "CreatedDate": "2022-01-01T00:00:00Z",
+      "DeletedDate": "2026-11-01T12:00:00Z",
+      "LastAccessedDate": "2026-10-01T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "ops"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:ops/fresh-secret-c3d4e5",
+      "Name": "ops/fresh-secret",
+      "Description": "Created last week, nothing has read it yet",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": false,
+      "CreatedDate": "2026-10-15T09:00:00Z",
+      "LastChangedDate": "2026-10-15T09:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "ops"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:ops/kubeconfig-blob-d4e5f6",
+      "Name": "ops/kubeconfig-blob",
+      "Description": "Cluster bootstrap file dropped here during the migration",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": false,
+      "CreatedDate": "2022-01-01T00:00:00Z",
+      "LastAccessedDate": "2026-10-19T00:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "ops"}]
+    },
+    {
+      "ARN": "arn:aws:secretsmanager:eu-west-1:111122223333:secret:ops/expired-recovery-e5f6a7",
+      "Name": "ops/expired-recovery",
+      "Description": "Recovery window already closed",
+      "KmsKeyId": "arn:aws:kms:eu-west-1:111122223333:key/1d9a8e40-1111-2222-3333-444455556666",
+      "RotationEnabled": false,
+      "CreatedDate": "2022-01-01T00:00:00Z",
+      "DeletedDate": "2026-09-20T12:00:00Z",
+      "Tags": [{"Key": "Owner", "Value": "ops"}]
+    }
+  ]
+}
