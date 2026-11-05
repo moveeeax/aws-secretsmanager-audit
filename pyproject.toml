@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aws-secretsmanager-audit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Audit AWS Secrets Manager for rotation that never runs, secrets nobody reads, managed-key encryption and wildcard resource policies"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Michael Tarassov", email = "michael@tarassov.me" }]
 keywords = ["aws", "secrets-manager", "audit", "security", "sre", "rotation"]
@@ -17,6 +17,11 @@ classifiers = [
   "Intended Audience :: System Administrators",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Security",
   "Topic :: System :: Systems Administration",
 ]
@@ -41,7 +46,7 @@ addopts = "-q"
 
 [tool.ruff]
 line-length = 110
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B"]

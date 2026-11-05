@@ -1,7 +1,7 @@
 # aws-secretsmanager-audit
 
 [![ci](https://github.com/moveeeax/aws-secretsmanager-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/moveeeax/aws-secretsmanager-audit/actions/workflows/ci.yml)
-[![python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Secrets Manager is where a credential goes to be forgotten. You create the secret during a
@@ -87,15 +87,26 @@ aws-secretsmanager-audit --fail-on rotation-stale,wildcard-resource-policy \
 Exit codes: `0` nothing you asked to fail on fired, `1` something did, `2` the invocation was
 wrong (unknown rule name, unreadable payload, unparseable `--as-of`).
 
-Useful flags:
+All flags:
 
-- `--require-tags Owner,Env` — turn `untagged` into a real ownership check instead of a
-  "has no tags at all" check.
-- `--all-secrets` — apply the rotation rules to every secret, not only the ones whose name,
-  description or tags read like a credential.
-- `--credential-pattern REGEX` — replace that heuristic with your own naming convention.
-- `--severity high` — drop the hygiene noise and keep what pages someone.
-- `--as-of 2026-10-20T12:00:00Z` — age the secrets against a fixed instant.
+| flag | default | what it does |
+| --- | --- | --- |
+| `--profile NAME` | default credential chain | AWS profile to collect with |
+| `--region REGION` | profile / environment region | AWS region to collect from |
+| `--from-json FILE` | | replay a dumped payload; no AWS calls, so `--profile`/`--region` are rejected |
+| `--dump-json FILE` | | write the collected payload here for later `--from-json` runs |
+| `--as-of TIMESTAMP` | payload `collected_at` under `--from-json`, otherwise now | age the secrets against a fixed instant, e.g. `2026-10-20T12:00:00Z` |
+| `--unused-days N` | `90` | `unused-secret` fires on a secret unread for N days |
+| `--rotation-grace-days N` | `7` | slack allowed past the rotation interval before `rotation-stale` fires |
+| `--require-tags KEYS` | | comma-separated tag keys every secret must carry; turns `untagged` into a real ownership check instead of a "has no tags at all" check |
+| `--credential-pattern REGEX` | built-in heuristic | replace the regex deciding which secrets the rotation rules apply to with your own naming convention |
+| `--all-secrets` | off | apply the rotation rules to every secret, not only the ones whose name, description or tags read like a credential |
+| `--format text\|json` | `text` | output format |
+| `--severity low\|medium\|high` | `low` | drop findings below this severity; `high` keeps what pages someone |
+| `--ignore-rule RULE` | | skip a rule; repeatable, and each value may be a comma-separated list |
+| `--ignore-secret NAME` | | skip a secret by name or ARN; a trailing `*` matches a prefix; repeatable |
+| `--fail-on RULES` | | comma-separated rules that make the run exit `1` |
+| `--version` | | print the version and exit |
 
 See [`examples/`](examples/) for a credential-free dump and its full output.
 
