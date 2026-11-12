@@ -1,0 +1,5 @@
+# Secret-name glob -> owner. The first glob that matches wins, so the specific entry for
+# stale-token sits above the prod/api/* catch-all.
+prod/api/stale-token: oncall-payments@example.com
+prod/api/*: api-team
+"legacy/*": legacy-owners

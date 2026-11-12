@@ -79,6 +79,7 @@ def test_a_neglected_secret_collects_every_hygiene_rule(rules_for):
     assert fired["legacy/import-key"] == {
         "rotation-disabled",
         "unused-secret",
+        "unowned-secret",
         "default-kms-key",
         "no-description",
         "untagged",
@@ -136,6 +137,7 @@ def test_ignore_rule_suppresses_only_its_target(rules_for):
     fired = rules_for("hygiene.json", ignore_rules=["unused-secret"])
     assert fired["legacy/import-key"] == {
         "rotation-disabled",
+        "unowned-secret",
         "default-kms-key",
         "no-description",
         "untagged",
@@ -163,7 +165,7 @@ def test_findings_are_sorted_by_secret_then_severity(findings_for):
     names = [f.secret for f in findings]
     assert names == sorted(names)
     first = [f for f in findings if f.secret == "legacy/import-key"]
-    assert [f.severity for f in first] == ["high", "medium", "low", "low", "low"]
+    assert [f.severity for f in first] == ["high", "medium", "medium", "low", "low", "low"]
 
 
 def test_every_rule_has_a_declared_severity():

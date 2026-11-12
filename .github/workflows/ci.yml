@@ -49,3 +49,9 @@ jobs:
         run: |
           aws-secretsmanager-audit --from-json tests/fixtures/empty.json \
             --fail-on rotation-stale
+
+      - name: Build the rotation schedule and calendar for the bundled example
+        run: |
+          aws-secretsmanager-audit --from-json examples/sample-dump.json --schedule \
+            --owners examples/owners.yaml --export-ics "$RUNNER_TEMP/rotation.ics"
+          grep -q '^BEGIN:VEVENT' "$RUNNER_TEMP/rotation.ics"
