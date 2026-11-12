@@ -10,8 +10,17 @@ from typing import Any, Dict, List, Optional, Sequence, TextIO
 
 from . import __version__
 from .model import Payload, parse_time
-from .report import render_json, render_text
+from .owners import DEFAULT_OWNER_TAG, OwnersError, load_owners
+from .report import (
+    GROUP_BY,
+    render_ics,
+    render_json,
+    render_schedule_json,
+    render_schedule_text,
+    render_text,
+)
 from .rules import ALL_RULES, SEVERITIES, Options, audit
+from .schedule import build_schedule, parse_duration, parse_intervals
 
 EXIT_CLEAN = 0
 EXIT_FINDINGS = 1
@@ -51,8 +60,30 @@ def build_parser() -> argparse.ArgumentParser:
     tune.add_argument("--all-secrets", action="store_true",
                       help="apply rotation rules to every secret, not just credential-shaped ones")
 
+    own = p.add_argument_group("ownership")
+    own.add_argument("--owners", metavar="FILE",
+                     help="YAML mapping of secret-name glob to owner; the first matching glob wins")
+    own.add_argument("--owner-tag", metavar="KEY", default=DEFAULT_OWNER_TAG,
+                     help="tag key read when no --owners glob matches, case-insensitive "
+                     "(default %s); an empty value turns the tag lookup off" % DEFAULT_OWNER_TAG)
+
+    sched = p.add_argument_group("rotation schedule")
+    sched.add_argument("--schedule", action="store_true",
+                       help="print the rotation schedule (next due date per credential) "
+                       "instead of findings")
+    sched.add_argument("--interval", action="append", default=[], metavar="PATTERN=DURATION",
+                       help="rotation policy per class of secret, e.g. 'db|password=90d,signing=365d,"
+                       "default=180d'; PATTERN is a regex over name, description and tags; repeatable")
+    sched.add_argument("--remind-before", default="14d", metavar="DURATION",
+                       help="mark a rotation due-soon this far ahead and set the calendar alarm "
+                       "(default 14d)")
+    sched.add_argument("--export-ics", metavar="FILE",
+                       help="write the schedule as an iCalendar file; works with or without --schedule")
+
     out = p.add_argument_group("output")
     out.add_argument("--format", choices=("text", "json"), default="text")
+    out.add_argument("--group-by", choices=GROUP_BY, default="secret",
+                     help="group the text report by secret (default) or by owner")
     out.add_argument("--severity", choices=SEVERITIES, default="low",
                      help="drop findings below this severity (default low)")
     out.add_argument("--ignore-rule", action="append", default=[], metavar="RULE")
@@ -97,6 +128,22 @@ def main(argv: Optional[Sequence[str]] = None,
     if args.from_json and (args.profile or args.region):
         err.write("--from-json replays a dump; --profile/--region do not apply\n")
         return EXIT_USAGE
+    if args.schedule and fail_on:
+        err.write("--fail-on gates findings; --schedule prints no findings to gate on\n")
+        return EXIT_USAGE
+    try:
+        intervals = parse_intervals(args.interval)
+        remind_days = parse_duration(args.remind_before)
+    except ValueError as exc:
+        err.write("cannot read the schedule options: %s\n" % exc)
+        return EXIT_USAGE
+    owners = []
+    if args.owners:
+        try:
+            owners = load_owners(args.owners)
+        except (OSError, OwnersError) as exc:
+            err.write("cannot read --owners: %s\n" % exc)
+            return EXIT_USAGE
 
     try:
         raw = _load_payload(args, err)
@@ -130,13 +177,28 @@ def main(argv: Optional[Sequence[str]] = None,
         ignore_rules=ignore_rules,
         ignore_secrets=list(args.ignore_secret),
         min_severity=args.severity,
+        owners=owners,
+        owner_tag=args.owner_tag.strip(),
     )
+
+    if args.schedule or args.export_ics:
+        rows = build_schedule(payload, as_of, opts, intervals, remind_days)
+        if args.export_ics:
+            with open(args.export_ics, "w", encoding="utf-8", newline="") as fh:
+                fh.write(render_ics(rows, as_of, raw, remind_days))
+        if args.schedule:
+            if args.format == "json":
+                out.write(render_schedule_json(rows, as_of, raw, remind_days, args.rotation_grace_days))
+            else:
+                out.write(render_schedule_text(rows, as_of, remind_days, args.group_by))
+            return EXIT_CLEAN
+
     findings = audit(payload, as_of, opts)
 
     if args.format == "json":
         out.write(render_json(findings, len(payload), as_of, raw))
     else:
-        out.write(render_text(findings, len(payload), as_of))
+        out.write(render_text(findings, len(payload), as_of, args.group_by))
 
     if fail_on and any(f.rule in set(fail_on) for f in findings):
         return EXIT_FINDINGS

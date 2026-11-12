@@ -1,0 +1,5 @@
+# Secret-name glob -> owner, read by --owners. The first glob that matches a secret wins,
+# so put specific entries above broad ones. Secrets no glob matches fall back to their
+# `owner` tag (any case), and the ones with neither are reported as unowned-secret.
+prod/stripe/*: payments-oncall@example.com
+legacy/*: platform

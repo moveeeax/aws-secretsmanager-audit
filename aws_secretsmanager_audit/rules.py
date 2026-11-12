@@ -5,10 +5,11 @@ from __future__ import annotations
 import datetime as dt
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from .model import Payload, Secret, days_between, format_day
+from .owners import DEFAULT_OWNER_TAG, OwnerRules, resolve_owner
 
 SEVERITIES = ("low", "medium", "high")
 
@@ -29,6 +30,7 @@ RULE_SEVERITY: Dict[str, str] = {
     "wildcard-resource-policy": "high",
     "unused-secret": "medium",
     "pending-deletion": "medium",
+    "unowned-secret": "medium",
     "default-kms-key": "low",
     "no-description": "low",
     "untagged": "low",
@@ -44,11 +46,13 @@ class Finding:
     rule: str
     severity: str
     detail: str
+    owner: Optional[str] = None
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> Dict[str, Optional[str]]:
         return {
             "secret": self.secret,
             "arn": self.arn,
+            "owner": self.owner,
             "rule": self.rule,
             "severity": self.severity,
             "detail": self.detail,
@@ -65,6 +69,12 @@ class Options:
     ignore_rules: Sequence[str] = ()
     ignore_secrets: Sequence[str] = ()
     min_severity: str = "low"
+    owners: OwnerRules = ()
+    owner_tag: str = DEFAULT_OWNER_TAG
+
+
+def owner_of(secret: Secret, opts: Options) -> Optional[str]:
+    return resolve_owner(secret, opts.owners, opts.owner_tag)
 
 
 def looks_like_credential(secret: Secret, opts: Options) -> bool:
@@ -275,6 +285,20 @@ def rule_ownership(secret: Secret, as_of: dt.datetime, opts: Options) -> List[Fi
     return findings
 
 
+def rule_unowned(secret: Secret, as_of: dt.datetime, opts: Options) -> List[Finding]:
+    """unowned-secret: nobody to page. ``untagged`` checks tag keys; this checks for a person."""
+    if secret.deleted or owner_of(secret, opts):
+        return []
+    sources = []
+    if opts.owners:
+        sources.append("no --owners glob matches the name")
+    if opts.owner_tag:
+        sources.append("no %r tag" % opts.owner_tag)
+    if not sources:
+        sources.append("no --owners file and the owner tag lookup is off")
+    return [_finding(secret, "unowned-secret", "no owner to route findings to: %s" % ", ".join(sources))]
+
+
 RULE_FUNCTIONS = (
     rule_rotation,
     rule_unused,
@@ -282,6 +306,7 @@ RULE_FUNCTIONS = (
     rule_resource_policy,
     rule_pending_deletion,
     rule_ownership,
+    rule_unowned,
 )
 
 
@@ -295,7 +320,7 @@ def _finding(secret: Secret, rule: str, detail: str) -> Finding:
     )
 
 
-def _secret_ignored(secret: Secret, patterns: Iterable[str]) -> bool:
+def secret_ignored(secret: Secret, patterns: Iterable[str]) -> bool:
     for pattern in patterns:
         if secret.name == pattern or secret.arn == pattern:
             return True
@@ -310,14 +335,15 @@ def audit(payload: Payload, as_of: dt.datetime, opts: Options) -> List[Finding]:
     ignored_rules = set(opts.ignore_rules)
     findings: List[Finding] = []
     for secret in payload:
-        if _secret_ignored(secret, opts.ignore_secrets):
+        if secret_ignored(secret, opts.ignore_secrets):
             continue
+        owner = owner_of(secret, opts)
         for fn in RULE_FUNCTIONS:
             for finding in fn(secret, as_of, opts):
                 if finding.rule in ignored_rules:
                     continue
                 if SEVERITIES.index(finding.severity) < min_rank:
                     continue
-                findings.append(finding)
+                findings.append(replace(finding, owner=owner))
     findings.sort(key=lambda f: (f.secret, -SEVERITIES.index(f.severity), f.rule))
     return findings
